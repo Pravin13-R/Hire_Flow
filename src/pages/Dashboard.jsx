@@ -1,31 +1,56 @@
-﻿const Dashboard = () => {
+﻿import { useCandidates } from "../context/CandidateContext";
+import { useJobs } from "../context/JobContext";
+import { useInterviews } from "../context/InterviewContext";
+import { useTeam } from "../context/TeamContext";
+import { useNavigate } from "react-router-dom";
 
-  //{Statistics} 
+const Dashboard = () => {
+
+  const navigate = useNavigate();
+  const { candidates, loading: candidatesLoading } = useCandidates();
+  const { jobs, loading: jobsLoading } = useJobs();
+  const { interviews, loading: interviewsLoading } = useInterviews();
+  const { team, loading: teamLoading } = useTeam();
+
+  const totalCandidates = candidates.length;
+  const activeJobs = jobs.filter(
+    (job) => job.status === "Active" || job.status === "Open"
+  ).length;
+  const totalInterviews = interviews.length;
+  const hiredCandidates = candidates.filter(
+    (candidate) => candidate.status === "Hired"
+  ).length;
+  const activeTeamMembers = team.filter(
+    (member) => member.status === "Active"
+  ).length;
+  const isLoading =
+    candidatesLoading || jobsLoading || interviewsLoading || teamLoading;
+
   const stats = [
     {
       title : "Total Candidates",
-      value : "248",
+      value : totalCandidates,
       growth : "+12%",
       icon : "bi-people-fill",
       color : "primary",
     },
     {
       title : "Active Jobs",
-      value : "24",
+      value : activeJobs,
       growth : "+4%",
       icon : "bi-briefcase-fill",
       color : "success",
     },
     {
       title : "Interviews",
-      value : "18",
+      value : totalInterviews,
       growth : "+8%",
       icon : "bi-calendar-check-fill",
       color : "warning",
     },
     {
       title: "Hired",
-      value: "32",
+      value: hiredCandidates,
       growth: "+15%",
       icon: "bi-person-check-fill",
       color: "purple",
@@ -33,7 +58,6 @@
     
   ];
 
-    // {pipeline}
 
     const pipeline = [
       {
@@ -80,8 +104,7 @@
     },
     ];
 
-    // // {recent candidates}
-    const candidates = [
+    const recentCandidates = [
       {
         name : "Arthi",
         email: "arthi@gmail.com",
@@ -136,9 +159,8 @@
     ];
 
 
-    // // {Upcoming interviews}
 
-    const interviews = [
+    const upcomingInterviews = [
         {
         name : "Arthi",
         role : "React Developer",
@@ -194,7 +216,10 @@
           <div className='d-flex justify-content-between align-items-center flex-wrap gap-3'>
             <div>
               <h2 className='fw-bold mb-1'>Dashboard</h2>
-              <p className='text-muted mb-0'>Welcome, Pravin! Here's your recruitment overview.</p>
+              <p className='text-muted mb-0'>
+                Welcome, Pravin! Here's your recruitment overview.{" "}
+                {!teamLoading && `${activeTeamMembers} active team members`}
+              </p>
             </div>
 
             <button className='btn btn-light border shadow-sm d-flex align-items-center gap-2'>
@@ -209,7 +234,6 @@
       </div>
 
 
-      {/* // stats */}
 
       
       <div className="row g-4 mb-4">
@@ -234,7 +258,7 @@
                     </p>
 
                     <h2 className="fw-bold mb-1">
-                      {stat.value}
+                      {isLoading ? "..." : stat.value}
                     </h2>
 
                     <small className="text-success fw-semibold">
@@ -272,7 +296,6 @@
       </div>
 
 
-      {/* pipeline */}
 
 
       <div className='row g-4 mb-4'>
@@ -296,7 +319,10 @@
 
                 </div>
 
-                <button className="btn btn-primary btn-sm">
+                <button
+                  className="btn btn-primary btn-sm"
+                  onClick={() => navigate("/pipelines")}
+                >
                   View Pipeline
                   <i className="bi bi-arrow-right ms-2"></i>
                 </button>
@@ -363,7 +389,6 @@
         </div>
 
 
-        {/* //candidate source */}
 
         <div className='col-12 col-xl-4'>
           <div className='card border-0 shadow-sm h-100'>
@@ -379,7 +404,6 @@
 
               </div>
 
-              {/* dount */}
 
               <div className='text-center my-4'>
                 <div className='mx-auto rounded-circle d-flex align-items-center justify-content-center'
@@ -402,7 +426,6 @@
 
               </div>
 
-              {/* source list */}
 
               <div className='d-flex flex-column gap-2 mx-auto' style={{ maxWidth: '220px' }}>
                 <div className='d-flex align-items-center justify-content-between w-100'>
@@ -455,7 +478,6 @@
       </div>
 
 
-      {/* recent candidate and interviews */}
 
       <div className='row g-4'>
         <div className='col-12 col-xl-7'>
@@ -465,7 +487,12 @@
 
                 <h5 className='fw-bold mb-0'>Recent Candidate</h5>
 
-                <button className='btn btn-link text-primary text-decoration-none'>View All  → </button>
+                <button
+                  className='btn btn-link text-primary text-decoration-none'
+                  onClick={() => navigate("/candidates")}
+                >
+                  View All →
+                </button>
 
               </div>
 
@@ -483,7 +510,7 @@
                   </thead>
 
                   <tbody>
-                    {candidates.map((candidate) => (
+                    {recentCandidates.map((candidate) => (
                       
                       <tr key={candidate.name}>
                         <td>
@@ -522,11 +549,19 @@
 
                         <td>
                           <div className='d-flex gap-2'>
-                             <button className="btn btn-sm btn-light">
+                             <button
+                              className="btn btn-sm btn-light"
+                              aria-label={`View ${candidate.name}`}
+                              onClick={() => navigate("/candidates")}
+                            >
                               <i className="bi bi-eye"></i>
                             </button>
 
-                            <button className='btn btn-sm btn-light'>
+                            <button
+                              className='btn btn-sm btn-light'
+                              aria-label={`Edit ${candidate.name}`}
+                              onClick={() => navigate("/candidates")}
+                            >
                               <i className='bi bi-pencil'></i>
 
                             </button>
@@ -559,11 +594,16 @@
 
                 <h5 className='fw-bold mb-0'>Upcoming Interviews</h5>
 
-                <button className='btn btn-link text-primary text-decoration-none'>View All →</button>
+                <button
+                  className='btn btn-link text-primary text-decoration-none'
+                  onClick={() => navigate("/interviews")}
+                >
+                  View All →
+                </button>
 
               </div>
 
-              {interviews.map((interview) => (
+              {upcomingInterviews.map((interview) => (
                 <div className='border-bottom py-3' key={interview.name}>
 
                   <div className='d-flex justify-content-between align-items-center'>

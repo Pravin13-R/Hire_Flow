@@ -1,18 +1,64 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useJobs } from "../../context/JobContext";
 
 const Jobs = () => {
+    const navigate = useNavigate();
 
     const {
         jobs,
         loading,
         error,
         deleteJob,
+        updateJob,
         updateJobStatus,
     } = useJobs();
     const [search, setSearch] = useState ("");
     const [department, setDepartment] = useState("All");
     const [status, setStatus] = useState("All");
+    const [selectedJob, setSelectedJob] = useState(null);
+    const [actionMode, setActionMode] = useState(null);
+    const [editForm, setEditForm] = useState(null);
+
+    const openJobDetails = (job) => {
+        setSelectedJob(job);
+        setActionMode('view');
+    };
+
+    const openJobEditor = (job) => {
+        setSelectedJob(job);
+        setEditForm({
+            title: job.title,
+            department: job.department,
+            location: job.location,
+            experience: job.experience,
+            opening: String(job.opening),
+            skills: job.skills,
+            status: job.status,
+            postedDate: job.postedDate,
+        });
+        setActionMode('edit');
+    };
+
+    const closeJobDialog = () => {
+        setSelectedJob(null);
+        setActionMode(null);
+        setEditForm(null);
+    };
+
+    const handleEditChange = (event) => {
+        const { name, value } = event.target;
+        setEditForm((currentForm) => ({ ...currentForm, [name]: value }));
+    };
+
+    const handleEditSubmit = (event) => {
+        event.preventDefault();
+        updateJob(selectedJob.id, {
+            ...editForm,
+            opening: Number(editForm.opening),
+        });
+        closeJobDialog();
+    };
 
     const filteredJobs = jobs.filter((job) => {
         const matchesSearch =
@@ -60,9 +106,9 @@ const Jobs = () => {
                 <p className='text-muted mb-1'>Manage your job openings and hiring requirements</p>
             </div>
 
-            <button className='btn btn-primary'>
+            <button className='btn btn-primary' onClick={() => navigate('/jobs/add')}>
                 <i className='bi bi-plus-lg me-2'></i>
-                Add Jobs
+                Add Job
 
             </button>
         </div>
@@ -293,54 +339,46 @@ const Jobs = () => {
                                             </td>
 
                                             <td>
-                                                <div className='dropdown'>
-                                                    <button className='btn btn-light btn-sm'
-                                                    data-bs-toggle= "dropdown">
-                                                        <i className='bi bi-three-dots-vertical'></i>
+                                                <div className='d-flex flex-wrap gap-1'>
+                                                    <button
+                                                        type='button'
+                                                        className='btn btn-sm btn-outline-primary'
+                                                        aria-label={`View ${job.title}`}
+                                                        onClick={() => openJobDetails(job)}
+                                                    >
+                                                        <i className='bi bi-eye me-1'></i>View
                                                     </button>
-                                                    <ul className='dropdown-menu'>
-                                                        <li>
-                                                            <button className='dropdown-item'>
-                                                                <i className='bi bi-eye me-2'></i>View
-                                                            </button>
-                                                        </li>
-                                                        <li>
-                                                            <button
-                                                                className='dropdown-item'
-                                                                onClick={() => updateJobStatus(
-                                                                    job.id,
-                                                                    job.status === "Active" ? "Closed" : "Active"
-                                                                )}
-                                                            >
-                                                                <i className='bi bi-arrow-repeat me-2'></i>
-                                                                {job.status === "Active" ? "Close job" : "Reopen job"}
-                                                            </button>
-                                                        </li>
-                                                        <li>
-                                                            <button className='dropdown-item'>
-                                                                <i className='bi bi-pencil me-2'></i>Edit
-                                                            </button>
-                                                        </li>
-                                                        <li>
-                                                            <hr className='dropdown-divider'/>
-                                                        </li>
-                                                        <li>
-                                                            <button
-                                                                className='dropdown-item text-danger'
-                                                                onClick={() => {
-                                                                    if (window.confirm(`Delete "${job.title}"?`)) {
-                                                                        deleteJob(job.id);
-                                                                    }
-                                                                }}
-                                                            >
-                                                                <i className='bi bi-trash me-2'></i>
-                                                                Delete
-
-                                                            </button>
-                                                        </li>
-
-                                                    </ul>
-
+                                                    <button
+                                                        type='button'
+                                                        className='btn btn-sm btn-outline-secondary'
+                                                        aria-label={`Edit ${job.title}`}
+                                                        onClick={() => openJobEditor(job)}
+                                                    >
+                                                        <i className='bi bi-pencil me-1'></i>Edit
+                                                    </button>
+                                                    <button
+                                                        type='button'
+                                                        className='btn btn-sm btn-light'
+                                                        aria-label={`${job.status === "Active" ? "Close" : "Reopen"} ${job.title}`}
+                                                        onClick={() => updateJobStatus(
+                                                            job.id,
+                                                            job.status === "Active" ? "Closed" : "Active"
+                                                        )}
+                                                    >
+                                                        <i className='bi bi-arrow-repeat'></i>
+                                                    </button>
+                                                    <button
+                                                        type='button'
+                                                        className='btn btn-sm btn-outline-danger'
+                                                        aria-label={`Delete ${job.title}`}
+                                                        onClick={() => {
+                                                            if (window.confirm(`Delete "${job.title}"?`)) {
+                                                                deleteJob(job.id);
+                                                            }
+                                                        }}
+                                                    >
+                                                        <i className='bi bi-trash'></i>
+                                                    </button>
                                                 </div>
                                             </td>
 
@@ -371,6 +409,94 @@ const Jobs = () => {
             </div>
 
         </div>
+
+        {selectedJob && (
+            <>
+                <div className="modal-backdrop fade show"></div>
+                <div
+                    className="modal d-block"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="job-dialog-title"
+                    tabIndex="-1"
+                >
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title" id="job-dialog-title">
+                                    {actionMode === 'edit' ? 'Edit Job' : selectedJob.title}
+                                </h5>
+                                <button type="button" className="btn-close" aria-label="Close" onClick={closeJobDialog}></button>
+                            </div>
+                            {actionMode === 'edit' ? (
+                                <form onSubmit={handleEditSubmit}>
+                                    <div className="modal-body">
+                                        <div className="row g-3">
+                                            <div className="col-md-6">
+                                                <label className="form-label" htmlFor="edit-job-title">Job title</label>
+                                                <input id="edit-job-title" className="form-control" name="title" value={editForm.title} onChange={handleEditChange} required />
+                                            </div>
+                                            <div className="col-md-6">
+                                                <label className="form-label" htmlFor="edit-job-department">Department</label>
+                                                <input id="edit-job-department" className="form-control" name="department" value={editForm.department} onChange={handleEditChange} required />
+                                            </div>
+                                            <div className="col-md-6">
+                                                <label className="form-label" htmlFor="edit-job-location">Location</label>
+                                                <input id="edit-job-location" className="form-control" name="location" value={editForm.location} onChange={handleEditChange} required />
+                                            </div>
+                                            <div className="col-md-6">
+                                                <label className="form-label" htmlFor="edit-job-experience">Experience</label>
+                                                <input id="edit-job-experience" className="form-control" name="experience" value={editForm.experience} onChange={handleEditChange} required />
+                                            </div>
+                                            <div className="col-md-6">
+                                                <label className="form-label" htmlFor="edit-job-openings">Openings</label>
+                                                <input id="edit-job-openings" className="form-control" type="number" name="opening" min="1" step="1" value={editForm.opening} onChange={handleEditChange} required />
+                                            </div>
+                                            <div className="col-md-6">
+                                                <label className="form-label" htmlFor="edit-job-status">Status</label>
+                                                <select id="edit-job-status" className="form-select" name="status" value={editForm.status} onChange={handleEditChange}>
+                                                    <option value="Active">Active</option>
+                                                    <option value="Closed">Closed</option>
+                                                </select>
+                                            </div>
+                                            <div className="col-md-6">
+                                                <label className="form-label" htmlFor="edit-job-skills">Skills</label>
+                                                <input id="edit-job-skills" className="form-control" name="skills" value={editForm.skills} onChange={handleEditChange} required />
+                                            </div>
+                                            <div className="col-md-6">
+                                                <label className="form-label" htmlFor="edit-job-posted-date">Posted date</label>
+                                                <input id="edit-job-posted-date" className="form-control" type="date" name="postedDate" value={editForm.postedDate} onChange={handleEditChange} required />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="modal-footer">
+                                        <button type="button" className="btn btn-outline-secondary" onClick={closeJobDialog}>Cancel</button>
+                                        <button type="submit" className="btn btn-primary">Save Changes</button>
+                                    </div>
+                                </form>
+                            ) : (
+                                <>
+                                    <div className="modal-body">
+                                        <dl className="row mb-0">
+                                            <dt className="col-sm-4">Department</dt><dd className="col-sm-8">{selectedJob.department}</dd>
+                                            <dt className="col-sm-4">Location</dt><dd className="col-sm-8">{selectedJob.location}</dd>
+                                            <dt className="col-sm-4">Experience</dt><dd className="col-sm-8">{selectedJob.experience}</dd>
+                                            <dt className="col-sm-4">Openings</dt><dd className="col-sm-8">{selectedJob.opening}</dd>
+                                            <dt className="col-sm-4">Status</dt><dd className="col-sm-8">{selectedJob.status}</dd>
+                                            <dt className="col-sm-4">Skills</dt><dd className="col-sm-8">{selectedJob.skills}</dd>
+                                            <dt className="col-sm-4">Posted</dt><dd className="col-sm-8">{selectedJob.postedDate}</dd>
+                                        </dl>
+                                    </div>
+                                    <div className="modal-footer">
+                                        <button type="button" className="btn btn-outline-secondary" onClick={closeJobDialog}>Close</button>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </>
+        )}
 
     </div>
   );

@@ -9,7 +9,6 @@ const Candidates = () => {
         candidates,
         loading,
         error,
-        restoreCandidates,
         deleteCandidate,
     } = useCandidates();
 
@@ -90,7 +89,6 @@ const Candidates = () => {
 
   return (
     <div className='container-fluid py-4'>
-        {/* head */}
 
         <div className='d-flex justify-content-between align-items-center mb-4'>
 
@@ -100,7 +98,7 @@ const Candidates = () => {
             </div>
 
             <div className='d-flex gap-2'>
-                <button
+                {/* <button
                     className='btn btn-outline-secondary'
                     onClick={() => {
                         if (window.confirm("Restore the original sample candidates? This replaces the current candidate list.")) {
@@ -110,7 +108,7 @@ const Candidates = () => {
                 >
                     <i className='bi bi-arrow-counterclockwise me-2'></i>
                     Restore Sample Candidates
-                </button>
+                </button> */}
                 <button className='btn btn-primary' onClick={() => navigate('/candidates/add')}>
                     <i className='bi bi-person-plus me-2'></i>
                     Add Candidate
@@ -119,7 +117,6 @@ const Candidates = () => {
 
         </div>
 
-        {/* ststics */}
 
         <div className='row g-4 mb-4'>
 
@@ -146,7 +143,6 @@ const Candidates = () => {
 
             </div>
 
-            {/* active */}
 
             <div className='col-12 col-sm-6 col-xl-3'>
 
@@ -172,7 +168,6 @@ const Candidates = () => {
 
             </div>
 
-            {/* Shortlisted */}
 
             <div className='col-12 col-sm-6 col-xl-3'>
 
@@ -201,7 +196,6 @@ const Candidates = () => {
             </div>
 
 
-            {/* hired */}
 
             <div className='col-12 col-sm-6 col-xl-3'>
                 <div className='card border-0 shadow-sm h-100'>
@@ -233,7 +227,6 @@ const Candidates = () => {
 
 
 
-        {/* search and filter */}
 
         <div className='card border-0 shadow-sm mb-4'>
             <div className='card-body'>
@@ -253,7 +246,6 @@ const Candidates = () => {
 
                     </div>
 
-                    {/* status */}
 
                     <div className='col-12 col-md-4 col-lg-2'>
                         <label className='form-lable fw-semibold'>Status</label>
@@ -272,7 +264,6 @@ const Candidates = () => {
 
                     </div>
 
-                    {/* position */}
 
                     <div className='col-12 col-md-4 col-lg-3'>
                         <label className='form-lable fw-semibold'>Position</label>
@@ -290,7 +281,6 @@ const Candidates = () => {
 
                     </div>
 
-                    {/* reset */}
 
                     <div className='col-12 col-md-4 col-lg-2'>
                         <button className='btn btn-outline-secondary w-100' onClick={handleReset}>
@@ -307,7 +297,6 @@ const Candidates = () => {
 
         </div>
 
-        {/* candidate table */}
 
         <div className='card border-0 shadow-sm'>
             <div className='card-body'>
@@ -327,7 +316,6 @@ const Candidates = () => {
 
                 </div>
 
-                {/* table */}
 
                 <div className='table-responsive'>
                     <table className='table align-middle'>
@@ -399,7 +387,13 @@ const Candidates = () => {
                                                     View
                                                 </button>
 
-                                                <button className='btn btn-sm btn-light' title='Edit'> <i className='bi bi-pencil'></i></button>
+                                                <button
+                                                    className='btn btn-sm btn-light'
+                                                    title='Edit'
+                                                    onClick={() => navigate(`/candidates/edit/${candidate.id}`)}
+                                                >
+                                                    <i className='bi bi-pencil'></i>
+                                                </button>
 
                                                 <button
                                                     className='btn btn-sm btn-light text-danger'

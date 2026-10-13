@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import MatchResultCard from '../components/matching/MatchResultCard'
 import { calculateSkillMatch } from '../utils/skillMatcher';
 import { useCandidates } from "../context/CandidateContext";
 
 
 const SkillMatching = () => {
+    const navigate = useNavigate();
     const { candidates, loading } = useCandidates();
 
     const jobs = [
@@ -363,7 +365,11 @@ const SkillMatching = () => {
                     {matchingCandidates.map(
                         ({ candidate, result}) => (
                             <div className='col-md-6 col-xl-4' key={candidate.id}>
-                                <MatchResultCard candidate={candidate} result={result} />
+                                <MatchResultCard
+                                    candidate={candidate}
+                                    result={result}
+                                    onViewCandidate={() => navigate(`/candidates/${candidate.id}`)}
+                                />
 
                             </div>
                         )

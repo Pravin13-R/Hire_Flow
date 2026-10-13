@@ -1,6 +1,4 @@
-import React from 'react'
-
-const MatchResultCard = ({ candidate, result }) => {
+const MatchResultCard = ({ candidate, result, onViewCandidate }) => {
     const { percentage, matchedSkills, missingSkills } = result
     const matchColor = percentage >= 80 ? 'success' : percentage >= 60 ? 'warning' : 'danger'
 
@@ -68,7 +66,11 @@ const MatchResultCard = ({ candidate, result }) => {
                 ))}
             </div>
 
-            <button className='btn btn-outline-primary btn-sm w-100 mt-3'>
+            <button
+                type='button'
+                className='btn btn-outline-primary btn-sm w-100 mt-3'
+                onClick={onViewCandidate}
+            >
                 <i className='bi bi-person me-2'></i>
                 View Candidate
             </button>

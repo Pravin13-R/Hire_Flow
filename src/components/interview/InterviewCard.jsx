@@ -1,4 +1,11 @@
-function InterviewCard({ interview, onDelete, onStatusChange }) {
+function InterviewCard({
+  interview,
+  candidateAvailable,
+  onViewCandidate,
+  onEditCandidate,
+  onDelete,
+  onStatusChange,
+}) {
   return (
     <div className="card border-0 shadow-sm h-100">
       <div className="card-body">
@@ -77,13 +84,26 @@ function InterviewCard({ interview, onDelete, onStatusChange }) {
 
         <div className="d-flex gap-2">
 
-          <button className="btn btn-outline-primary btn-sm flex-grow-1">
+          <button
+            type="button"
+            className="btn btn-outline-primary btn-sm flex-grow-1"
+            onClick={onViewCandidate}
+            disabled={!candidateAvailable}
+            title={candidateAvailable ? "View candidate" : "Candidate record unavailable"}
+          >
             <i className="bi bi-eye me-1"></i>
             View
           </button>
 
-          <button className="btn btn-outline-secondary btn-sm">
-            <i className="bi bi-pencil"></i>
+          <button
+            type="button"
+            className="btn btn-outline-secondary btn-sm"
+            aria-label={`Edit ${interview.candidate}`}
+            onClick={onEditCandidate}
+            disabled={!candidateAvailable}
+            title={candidateAvailable ? "Edit candidate" : "Candidate record unavailable"}
+          >
+            <i className="bi bi-pencil" aria-hidden="true"></i>
           </button>
 
           <button

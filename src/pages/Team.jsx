@@ -4,10 +4,44 @@ import { useTeam } from "../context/TeamContext";
 
 const Team = () => {
 
-    const { team, loading, error, deleteTeamMember } = useTeam();
+    const { team, loading, error, addTeamMember, deleteTeamMember } = useTeam();
 
     const [search, setSearch] = useState("");
     const [department, setDepartment] = useState("All");
+    const [showAddForm, setShowAddForm] = useState(false);
+    const [form, setForm] = useState({
+        name: "",
+        email: "",
+        phone: "",
+        role: "",
+        department: "",
+        location: "",
+        status: "Active",
+    });
+
+    const handleFormChange = (event) => {
+        const { name, value } = event.target;
+        setForm((currentForm) => ({ ...currentForm, [name]: value }));
+    };
+
+    const closeAddForm = () => {
+        setShowAddForm(false);
+        setForm({
+            name: "",
+            email: "",
+            phone: "",
+            role: "",
+            department: "",
+            location: "",
+            status: "Active",
+        });
+    };
+
+    const handleAddSubmit = (event) => {
+        event.preventDefault();
+        addTeamMember(form);
+        closeAddForm();
+    };
 
     const filteredTeam = team.filter(
         (member) => {
@@ -67,7 +101,7 @@ const Team = () => {
                     <p className='text-muted mb-0'>Manage your recruitment team</p>
                 </div>
 
-                <button className='btn btn-primary'>
+                <button type="button" className='btn btn-primary' onClick={() => setShowAddForm(true)}>
                     <i className='bi bi-person-plus-fill me-2'></i>
                     Add Team Member
 
@@ -204,6 +238,74 @@ const Team = () => {
                     ))}
 
                 </div>
+
+                {showAddForm && (
+                    <>
+                        <div className="modal-backdrop fade show"></div>
+                        <div
+                            className="modal d-block"
+                            role="dialog"
+                            aria-modal="true"
+                            aria-labelledby="add-team-member-title"
+                            tabIndex="-1"
+                        >
+                            <div className="modal-dialog modal-dialog-centered">
+                                <div className="modal-content">
+                                    <form onSubmit={handleAddSubmit}>
+                                        <div className="modal-header">
+                                            <h5 className="modal-title" id="add-team-member-title">Add Team Member</h5>
+                                            <button type="button" className="btn-close" aria-label="Close" onClick={closeAddForm}></button>
+                                        </div>
+                                        <div className="modal-body">
+                                            <div className="row g-3">
+                                                <div className="col-md-6">
+                                                    <label className="form-label" htmlFor="team-member-name">Full name</label>
+                                                    <input id="team-member-name" className="form-control" name="name" value={form.name} onChange={handleFormChange} required />
+                                                </div>
+                                                <div className="col-md-6">
+                                                    <label className="form-label" htmlFor="team-member-email">Email</label>
+                                                    <input id="team-member-email" className="form-control" type="email" name="email" value={form.email} onChange={handleFormChange} required />
+                                                </div>
+                                                <div className="col-md-6">
+                                                    <label className="form-label" htmlFor="team-member-phone">Phone</label>
+                                                    <input id="team-member-phone" className="form-control" type="tel" name="phone" value={form.phone} onChange={handleFormChange} required />
+                                                </div>
+                                                <div className="col-md-6">
+                                                    <label className="form-label" htmlFor="team-member-role">Role</label>
+                                                    <input id="team-member-role" className="form-control" name="role" value={form.role} onChange={handleFormChange} required />
+                                                </div>
+                                                <div className="col-md-6">
+                                                    <label className="form-label" htmlFor="team-member-department">Department</label>
+                                                    <select id="team-member-department" className="form-select" name="department" value={form.department} onChange={handleFormChange} required>
+                                                        <option value="" disabled>Select a department</option>
+                                                        <option value="Human Resources">Human Resources</option>
+                                                        <option value="Recruitment">Recruitment</option>
+                                                        <option value="Engineering">Engineering</option>
+                                                    </select>
+                                                </div>
+                                                <div className="col-md-6">
+                                                    <label className="form-label" htmlFor="team-member-location">Location</label>
+                                                    <input id="team-member-location" className="form-control" name="location" value={form.location} onChange={handleFormChange} required />
+                                                </div>
+                                                <div className="col-md-6">
+                                                    <label className="form-label" htmlFor="team-member-status">Status</label>
+                                                    <select id="team-member-status" className="form-select" name="status" value={form.status} onChange={handleFormChange}>
+                                                        <option value="Active">Active</option>
+                                                        <option value="Inactive">Inactive</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="modal-footer">
+                                            <button type="button" className="btn btn-outline-secondary" onClick={closeAddForm}>Cancel</button>
+                                            <button type="submit" className="btn btn-primary">Add Member</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </>
+                )}
             </div>
 
         </div>

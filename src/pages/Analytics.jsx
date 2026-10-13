@@ -1,544 +1,210 @@
-import React from 'react'
+import { useMemo } from "react";
 import {
   ResponsiveContainer,
-  LineChart,
-  Line,
   BarChart,
   Bar,
-  PieChart,
-  Pie,
-  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
+  PieChart,
+  Pie,
+  Cell,
   Legend,
 } from "recharts";
 
-const Analytics = () => {
+import { useCandidates } from "../context/CandidateContext";
+import { useJobs } from "../context/JobContext";
+import { useInterviews } from "../context/InterviewContext";
 
-    const hiringTrend = [
-        {
-            month: "Apr",
-            candidates: 120,
-            hired: 12,
-        },
-          {
-            month: "May",
-            candidates: 145,
-            hired: 15,
-        },
-          {
-            month: "Jun",
-            candidates: 165,
-            hired: 18,
-        },
-          {
-            month: "Jul",
-            candidates: 220,
-            hired: 21,
-        },
-          {
-            month: "Aug",
-            candidates: 220,
-            hired: 27,
-        },
-          {
-            month: "Sep",
-            candidates: 248,
-            hired: 32,
-        },
+const COLORS = [
+  "#6366f1",
+  "#10b981",
+  "#f59e0b",
+  "#ef4444",
+  "#8b5cf6",
+];
 
+function Analytics() {
+  const { candidates = [], loading: candidatesLoading } =
+    useCandidates();
+
+  const { jobs = [], loading: jobsLoading } = useJobs();
+
+  const { interviews = [], loading: interviewsLoading } =
+    useInterviews();
+
+  const loading =
+    candidatesLoading || jobsLoading || interviewsLoading;
+
+  const statusData = useMemo(() => {
+    const statuses = [
+      "Applied",
+      "Screening",
+      "Shortlisted",
+      "Interview",
+      "Offer",
+      "Hired",
+      "Rejected",
     ];
 
-    const recruitmentFunnel = [
-        {
-            stage: "Applied",
-            candidate: 248,
-        },
-         {
-            stage: "Screening",
-            candidate: 180,
-        },
-         {
-            stage: "Shortlisted",
-            candidate: 95,
-        },
-         {
-            stage: "Interview",
-            candidate: 52,
-        },
-         {
-            stage: "Offer",
-            candidate: 38,
-        },
-         {
-            stage: "Hired",
-            candidate: 32,
-        },
-    ];
+    return statuses.map((status) => ({
+      status,
+      count: candidates.filter(
+        (candidate) =>
+          candidate.status?.toLowerCase() === status.toLowerCase()
+      ).length,
+    }));
+  }, [candidates]);
 
-    const candidateSources =[
-        {
-            name: "LinkedIn",
-            value: 35,
-        },
-        {
-            name: "Naukri",
-            value: 25,
-        },
-        {
-            name: "Indeed",
-            value: 18,
-        },
-        {
-            name: "Referral",
-            value: 12,
-        },
-        {
-            name: "Others",
-            value: 10,
-        },
-    ];
+  const departmentData = useMemo(() => {
+    const counts = {};
 
-    const departmentHiring = [
-        {
-            department : "Engineering",
-            hired: 14,
+    jobs.forEach((job) => {
+      const department = job.department || "Other";
+      counts[department] = (counts[department] || 0) + 1;
+    });
 
-        },
+    return Object.entries(counts).map(([department, count]) => ({
+      department,
+      count,
+    }));
+  }, [jobs]);
 
-          {
-            department : "Design",
-            hired: 5,
+  const hiredCandidates = candidates.filter(
+    (candidate) => candidate.status?.toLowerCase() === "hired"
+  ).length;
 
-        },
+  const hiringRate =
+    candidates.length > 0
+      ? ((hiredCandidates / candidates.length) * 100).toFixed(1)
+      : "0.0";
 
-          {
-            department : "Marketing",
-            hired: 4,
-
-        },
-
-          {
-            department : "HR",
-            hired: 3,
-
-        },
-
-          {
-            department : "Sales",
-            hired: 6,
-
-        },
-    ];
-
-    const interviewData = [
-        {
-            type: "Technical",
-            schedule: 24,
-            completed: 18,
-        },
-        {
-            type: "HR",
-            schedule: 18,
-            completed: 14,
-        },
-        {
-            type: "Managerial",
-            schedule: 12,
-            completed: 9,
-        },
-    ];
-
-    const pieColors = [
-         "#0d6efd",
-    "#6f42c1",
-    "#dc3545",
-    "#20c997",
-    "#ffc107",
-    ];
-
-
+  if (loading) {
+    return (
+      <div className="container-fluid py-4">
+        <p>Loading recruitment analytics...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className='container-fluid p-4'>
-        <div className='d-flex justify-content-between align-items-center mb-4'>
-            <div>
-                <h2 className='fw-bold mb-1'>Analytics</h2>
-                <p className='text-muted mb-0'>Recruitment performance and hiring insights</p>
-            </div>
-            <button className='btn btn-outline-secondary'>
-                <i className='bi bi-calendar3 me-2'></i>
-                Last 6 Months 
-                <i className='bi bi-chevron-down ms-2'></i>
-
-            </button>
-
-        </div>
-
-        {/* statistics */}
-
-        <div className='row g-4 mb-4'>
-            <div className='col-md-6 col-xl-3'>
-                <div className='card border-0 shadow-sm h-100'>
-                    <div className='card-body'>
-                        <div className='d-flex justofy-content-between align-items-center'>
-                            <div>
-                                <p className='text-muted mb-2'>Total Candidates</p>
-                                <h3 className='fw-bold mb-1'>248</h3>
-                                <small className='text-success'>
-                                    <i className='bi bi-arrow-up'></i>
-                                    12% from last month
-
-                                </small>
-                            </div>
-
-                            <div className='analytics-icon bg-primary bg-opacity-10'>
-                                <i className='bi bi-people-fill text-primary fs-4'></i>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-            {/* active jobs */}
-
-            <div className='col-md-6 col-xl-3'>
-                <div className='card border-0 shadow-sm h-100'>
-                    <div className='card-body'>
-                        <div className='d-flex justify-content-beteween align-items-center'>
-                            <div>
-                                <p className='text-muted mb-2'>Active Jobs</p>
-                                <h3 className='fw-bold mb-1'>24</h3>
-                                <small className='text-success'>
-                                    <i className='bi bi-arrow-up'></i>
-                                    4% from last month
-
-                                </small>
-                            </div>
-
-                            <div className='analytics-icon bg-success bg-opacity-10'>
-                                <i className='bi bi-briefcase-fill text-success fs-4'></i>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-            {/* interview */}
-
-            <div className='col-md-6 col-xl-3'>
-                <div className='card border-0 shadow-sm h-100'>
-                    <div className='card-body'>
-                        <div className='d-flex justify-content-between align-items-center'>
-                            <div>
-                                <p>Interviews</p>
-                                <h3 className='fw-bold mb-1'>18</h3>
-
-                                <small className='text-success'>
-                                    <i className='bi bi-arrow-up'></i>
-                                    8% from last month
-
-                                </small>
-                            </div>
-
-                            <div className='analytics-icon bg-warning bg-opacity-10'>
-                                <i className='bi bi-calender-check-fill text-warning fs-4'></i>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-            {/* hired */}
-
-            <div className='col-md-6 col-xl-3'>
-                <div className='card border-0 shadow-sm h-100'>
-                    <div className='card-body'>
-                        <div className='d-flex justify-content-between align-items-center'>
-                            <div>
-                                <p className='text-muted mb-2'>Hired</p>
-                                <h3 className='fw-bold mb-2'>32</h3>
-                                <small className='text-success'>
-                                    <i className='bi bi-arrow-up'></i>
-                                    15% from last month
-
-                                </small>
-                            </div>
-
-                            <div className='analytics-icon bg-info bg-opacity-10'>
-                                <i className='bi bi-person-check-fill text-info fs-4'></i>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        {/* hiring */}
-
-        <div className='card border-0 shadow-sm mb-4'>
-            <div className='card-body'>
-                <div className='d-flex justify-content-between align-items-center mb-4'>
-                    <div>
-                        <h5 className='fw-bold mb-1'>Hiring Overview</h5>
-                        <p>Candidate applications and hiring trends</p>
-                    </div>
-
-                </div>
-
-                <div style={{width: "100%", height: 350}}>
-                    <ResponsiveContainer>
-                        <LineChart data= {hiringTrend}>
-                            <CartesianGrid strokeDasharray="3 3"    />
-                            <XAxis dataKey="month" />
-                            <YAxis />
-                            <Tooltip />
-                            <Legend />
-                            <Line 
-                            type="monotone"
-                            dataKey="candidate"
-                            stroke="#0d6efd"
-                            strokeWidth={3}
-                            name="Candidate"
-
-                            />
-                             <Line 
-                            type="monotone"
-                            dataKey="hired"
-                            stroke="#20c997"
-                            strokeWidth={3}
-                            name="Hired"
-
-                            />
-
-                        </LineChart>
-                    </ResponsiveContainer>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        {/* funnel+ source */}
-
-        <div className='row g-4 mb-4'>
-            <div className='col-xl-7'>
-                <div className='card border-0 shadow-sm h-100'>
-                    <div className='card-body'>
-                        <h5 className='fw-bold mb-1'>Recruitment Funnel</h5>
-                        <p>Candidate progression through hiring stages</p>
-                        <div style={{width:"100%", height: 350}}>
-                            <ResponsiveContainer>
-                                <BarChart data={recruitmentFunnel} layout="vertical">
-                                    <CartesianGrid  strokeDasharray="3 3" />
-                                    <XAxis type="number" />
-                                    <YAxis type="category" dataKey="stage" width={90} />
-                                    <Tooltip />
-                                    <Bar dataKey="candidate" fill="#0d6efd" radius={[0, 6, 6, 0]} />
-
-                                </BarChart>
-                            </ResponsiveContainer>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-            {/* candidate source */}
-
-            <div className='col-xl-5'>
-                <div className='card border-0 shadow-sm h-100'>
-                    <div className='card-body'>
-                        <h5 className='fw-bold mb-1'>Candidate Sources</h5>
-                        <p className='text-muted small mb-3'>Where candidates are coming from</p>
-
-                        <div style={{ width: "100%", height: 280, }}>
-                            <ResponsiveContainer>
-                                <PieChart>
-                                    <Pie
-                                        data={candidateSources}
-                                        dataKey="value"
-                                        nameKey="name"
-                                        cx="50%"
-                                        cy="50%"
-                                        innerRadius={65}
-                                        outerRadius={100}
-                                        paddingAngle={3}
-                                    >
-                                        {candidateSources.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={pieColors[index]} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip />
-                                </PieChart>
-                            </ResponsiveContainer>
-
-                        </div>
-
-                        {/* source */}
-
-                        <div>
-                            {candidateSources.map(
-                                (source, index) => (
-                                    <div key={source.name} className='d-flex justify-content-between align-items-center mb-2'>
-                                        <div className='d-flex align-items-center'>
-                                            <span className='source-dot me-2' style={{backgroundColor: pieColors[index],}}>
-
-                                            </span>
-                                            <span>{source.name}</span>
-
-                                        </div>
-                                        <strong>{source.value}%</strong>
-
-                                    </div>
-                                )
-                            )}
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <div className='row g-4'>
-            <div className='col-xl-6'>
-                <div className='card border-0 shadow-sm h-100'>
-                    <div className='card-body'>
-                        <h5 className='fw-bold mb-1'>Department Hiring</h5>
-                        <p className='text-muted small mb-4'>Number of candidates hired by department</p>
-
-                        <div style={{ width: "100%", height: 320, }}>
-                            <ResponsiveContainer>
-                                 <BarChart data={departmentHiring}>
-
-                    <CartesianGrid strokeDasharray="3 3" />
-
-                    <XAxis dataKey="department" />
-
-                    <YAxis />
-
-                    <Tooltip />
-
-                    <Bar
-                      dataKey="hired"
-                      fill="#6f42c1"
-                      radius={[6, 6, 0, 0]}
-                    />
-
-                  </BarChart>
-
-
-                            </ResponsiveContainer>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            {/* interview */}
-
-              <div className="col-xl-6">
-
+    <div className="container-fluid py-4">
+      <div className="mb-4">
+        <h2 className="fw-bold">Recruitment Analytics</h2>
+        <p className="text-secondary">
+          Insights from your current candidates, jobs, and interviews.
+        </p>
+      </div>
+
+      <div className="row g-3 mb-4">
+        <div className="col-12 col-sm-6 col-xl-3">
           <div className="card border-0 shadow-sm h-100">
-
             <div className="card-body">
+              <p className="text-secondary mb-1">Total Candidates</p>
+              <h3 className="fw-bold">{candidates.length}</h3>
+            </div>
+          </div>
+        </div>
 
-              <h5 className="fw-bold mb-1">
-                Interview Statistics
+        <div className="col-12 col-sm-6 col-xl-3">
+          <div className="card border-0 shadow-sm h-100">
+            <div className="card-body">
+              <p className="text-secondary mb-1">Total Jobs</p>
+              <h3 className="fw-bold">{jobs.length}</h3>
+            </div>
+          </div>
+        </div>
+
+        <div className="col-12 col-sm-6 col-xl-3">
+          <div className="card border-0 shadow-sm h-100">
+            <div className="card-body">
+              <p className="text-secondary mb-1">Total Interviews</p>
+              <h3 className="fw-bold">{interviews.length}</h3>
+            </div>
+          </div>
+        </div>
+
+        <div className="col-12 col-sm-6 col-xl-3">
+          <div className="card border-0 shadow-sm h-100">
+            <div className="card-body">
+              <p className="text-secondary mb-1">Hiring Rate</p>
+              <h3 className="fw-bold">{hiringRate}%</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="row g-4">
+        <div className="col-12 col-xl-7">
+          <div className="card border-0 shadow-sm h-100">
+            <div className="card-body">
+              <h5 className="fw-semibold mb-3">
+                Candidates by Status
               </h5>
 
-              <p className="text-muted small mb-4">
-                Scheduled and completed interviews
-              </p>
-
-
-              <div
-                style={{
-                  width: "100%",
-                  height: 320,
-                }}
-              >
-
+              <div style={{ width: "100%", height: 320 }}>
                 <ResponsiveContainer>
-
-                  <BarChart data={interviewData}>
-
+                  <BarChart data={statusData}>
                     <CartesianGrid strokeDasharray="3 3" />
-
-                    <XAxis dataKey="type" />
-
-                    <YAxis />
-
+                    <XAxis dataKey="status" />
+                    <YAxis allowDecimals={false} />
                     <Tooltip />
-
-                    <Legend />
-
                     <Bar
-                      dataKey="scheduled"
-                      fill="#0d6efd"
-                      name="Scheduled"
-                      radius={[6, 6, 0, 0]}
+                      dataKey="count"
+                      fill="#6366f1"
+                      radius={[5, 5, 0, 0]}
                     />
-
-                    <Bar
-                      dataKey="completed"
-                      fill="#20c997"
-                      name="Completed"
-                      radius={[6, 6, 0, 0]}
-                    />
-
                   </BarChart>
-
                 </ResponsiveContainer>
-
               </div>
-
             </div>
-
           </div>
-
         </div>
 
-        </div>
+        <div className="col-12 col-xl-5">
+          <div className="card border-0 shadow-sm h-100">
+            <div className="card-body">
+              <h5 className="fw-semibold mb-3">
+                Jobs by Department
+              </h5>
 
+              {departmentData.length === 0 ? (
+                <p className="text-secondary">
+                  No job data available yet.
+                </p>
+              ) : (
+                <div style={{ width: "100%", height: 320 }}>
+                  <ResponsiveContainer>
+                    <PieChart>
+                      <Pie
+                        data={departmentData}
+                        dataKey="count"
+                        nameKey="department"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={95}
+                        label
+                      >
+                        {departmentData.map((entry, index) => (
+                          <Cell
+                            key={entry.department}
+                            fill={COLORS[index % COLORS.length]}
+                          />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  )
+  );
 }
 
-export default Analytics
+export default Analytics;

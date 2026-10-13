@@ -8,6 +8,7 @@ import AddCandidate from './pages/candidates/AddCandidate.jsx'
 import CandidateDetails from './pages/candidates/CandidateDetails'
 import CandidateEdit from './pages/candidates/CandidateEdit.jsx'
 import Jobs from './pages/jobs/Jobs.jsx'
+import AddJob from './pages/jobs/AddJob.jsx'
 import Pipeline from './pages/Pipeline.jsx'
 import Interviews from './pages/Interviews.jsx'
 import SkillMatching from './pages/SkillMatching.jsx'
@@ -30,6 +31,7 @@ function App() {
           <Route path="/candidates/edit/:id" element={<CandidateEdit />} />
           <Route path="/candidates/:id" element={<CandidateDetails />} />
           <Route path="/jobs" element={<Jobs />} />
+          <Route path="/jobs/add" element={<AddJob />} />
             <Route path="/pipelines" element={<Pipeline />} />
             <Route path='/interviews' element={<Interviews />} />
             <Route path='/skill-matching' element={<SkillMatching />} />
